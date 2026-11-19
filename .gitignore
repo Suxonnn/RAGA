@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+raga.log
+.env
+*.mp3
