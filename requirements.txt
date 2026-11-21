@@ -1,0 +1,4 @@
+psutil
+edge-tts
+pyttsx3
+pyyaml

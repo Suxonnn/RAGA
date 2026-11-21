@@ -1,0 +1,17 @@
+# Pengaturan RAGA. Gunakan tanda kutip tunggal '...' untuk jalur Windows.
+nama_pengguna: ""
+suara_edge: "id-ID-GadisNeural"   # pria: "id-ID-ArdiNeural"
+jeda_awal_detik: 5
+
+# Folder yang ditelusuri perintah "cari file". Kosongkan untuk memakai
+# Documents, Downloads, dan Desktop milik akun Windows-mu.
+folder_pencarian:
+  - 'E:\Project RAGA'
+
+# Workspace = kumpulan aplikasi yang dibuka dengan "buka <nama>".
+# "program" harus dikenali Windows (ada di PATH), "url" membuka browser bawaan.
+workspace:
+  coding:
+    - program: "code"
+      argumen: ['E:\Project RAGA']
+    - url: "https://github.com"

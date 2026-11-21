@@ -1,14 +1,14 @@
-"""RAGA - Tahap 1: salam otomatis setelah login Windows."""
-import asyncio
+"""RAGA.
+
+python main.py                  -> salam otomatis (dipakai Task Scheduler)
+python main.py --ketik          -> mode perintah lewat ketikan
+python main.py --ketik --senyap -> mode ketikan tanpa suara
+"""
+import argparse
 import datetime
 import logging
 import os
-import tempfile
 import time
-
-import psutil
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 logging.basicConfig(
@@ -17,9 +17,11 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
 )
 
-NAMA_PENGGUNA = "Marian Marxrist"  # isi namamu, misalnya "Budi"; kosongkan jika tidak perlu
-SUARA_EDGE = "id-ID-GadisNeural"  # alternatif: "id-ID-ArdiNeural" (pria)
-JEDA_AWAL_DETIK = 3  # beri waktu desktop & Wi-Fi siap
+import psutil  # noqa: E402
+
+from core.config import muat_config  # noqa: E402
+from core.router import jalankan, urai_perintah  # noqa: E402
+from voice.tts import bicara  # noqa: E402
 
 
 def sapaan_waktu() -> str:
@@ -34,68 +36,56 @@ def sapaan_waktu() -> str:
 
 
 def susun_teks() -> str:
-    bagian = [f"Selamat {sapaan_waktu()}"]
-    if NAMA_PENGGUNA:
-        bagian[0] += f", {NAMA_PENGGUNA}"
-    bagian[0] += ". Raga siap membantu."
+    nama = muat_config()["nama_pengguna"]
+    salam = f"Selamat {sapaan_waktu()}" + (f", {nama}" if nama else "")
+    bagian = [salam + ". Raga siap membantu."]
 
     baterai = psutil.sensors_battery()
     if baterai:
         status = "sedang diisi" if baterai.power_plugged else "belum dicolok"
         bagian.append(f"Baterai tersisa {int(baterai.percent)} persen, {status}.")
-
-    ram = psutil.virtual_memory().percent
-    bagian.append(f"Pemakaian RAM saat ini {int(ram)} persen.")
+    bagian.append(f"Pemakaian RAM saat ini {int(psutil.virtual_memory().percent)} persen.")
     return " ".join(bagian)
 
 
-def putar_mp3(path: str) -> None:
-    import ctypes
-
-    mci = ctypes.windll.winmm.mciSendStringW
-    mci("close raga", None, 0, 0)
-    if mci(f'open "{path}" type mpegvideo alias raga', None, 0, 0) != 0:
-        raise RuntimeError("MCI gagal membuka file audio")
-    try:
-        mci("play raga wait", None, 0, 0)
-    finally:
-        mci("close raga", None, 0, 0)
-
-
-def bicara_edge(teks: str) -> None:
-    import edge_tts
-
-    path = os.path.join(tempfile.gettempdir(), "raga_salam.mp3")
-    asyncio.run(edge_tts.Communicate(teks, SUARA_EDGE).save(path))
-    try:
-        putar_mp3(path)
-    finally:
-        if os.path.exists(path):
-            os.remove(path)
-
-
-def bicara_offline(teks: str) -> None:
-    import pyttsx3
-
-    engine = pyttsx3.init()
-    engine.setProperty("rate", 165)
-    engine.say(teks)
-    engine.runAndWait()
-
-
-def bicara(teks: str) -> None:
-    try:
-        bicara_edge(teks)
-    except Exception as e:
-        logging.warning("edge-tts gagal (%s), pakai suara offline", e)
-        bicara_offline(teks)
-
-
-def main() -> None:
-    time.sleep(JEDA_AWAL_DETIK)
+def salam() -> None:
+    time.sleep(muat_config()["jeda_awal_detik"])
     teks = susun_teks()
     logging.info("Salam: %s", teks)
     bicara(teks)
+
+
+def mode_ketik(bersuara: bool) -> None:
+    print("RAGA siap. Contoh: cek ram | cek baterai | cari file laporan | buka coding")
+    print("Ketik 'keluar' untuk berhenti.")
+    while True:
+        try:
+            teks = input("> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not teks:
+            continue
+        if teks.lower() in ("keluar", "exit", "quit"):
+            break
+        aksi, params = urai_perintah(teks)
+        if aksi is None:
+            tampil = ucap = "Maaf, aku belum mengerti perintah itu."
+        else:
+            tampil, ucap = jalankan(aksi, params)
+        print(tampil)
+        if bersuara:
+            bicara(ucap)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ketik", action="store_true")
+    parser.add_argument("--senyap", action="store_true")
+    args = parser.parse_args()
+    if args.ketik:
+        mode_ketik(bersuara=not args.senyap)
+    else:
+        salam()
 
 
 if __name__ == "__main__":
@@ -103,3 +93,4 @@ if __name__ == "__main__":
         main()
     except Exception:
         logging.exception("RAGA error")
+        raise
