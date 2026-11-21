@@ -18,17 +18,22 @@ AKSI = {
 }
 
 POLA = [
-    (r"^(?:cek\s+)?ram$", "cek_ram"),
-    (r"^(?:cek\s+)?cpu$", "cek_cpu"),
-    (r"^(?:cek\s+)?baterai$", "cek_baterai"),
-    (r"^(?:cek\s+)?disk$", "cek_disk"),
-    (r"^cari(?:\s+file)?\s+(?P<kata>.+)$", "cari_file"),
-    (r"^buka\s+(?P<nama>.+)$", "buka_workspace"),
+    (r"^(?:cek\s+|check\s+)?ram$", "cek_ram"),
+    (r"^(?:cek\s+|check\s+)?cpu$", "cek_cpu"),
+    (r"^(?:cek\s+|check\s+)?(?:baterai|battery)$", "cek_baterai"),
+    (r"^(?:cek\s+|check\s+)?(?:disk|storage)$", "cek_disk"),
+    (r"^(?:cari|find|search)(?:\s+(?:file|for))?\s+(?P<kata>.+)$", "cari_file"),
+    (r"^(?:buka|open)\s+(?P<nama>.+)$", "buka_workspace"),
 ]
+
+def normalisasi(teks: str) -> str:
+    teks = re.sub(r"[,!?;]", " ", teks.lower())
+    teks = re.sub(r"\s+", " ", teks).strip(" .")
+    return re.sub(r"^((?:raga|tolong|coba|please)\s+)+", "", teks)
 
 
 def urai_perintah(teks: str):
-    teks = teks.strip().lower()
+    teks = normalisasi(teks)          # <- baris ini menggantikan teks.strip().lower()
     for pola, aksi in POLA:
         cocok = re.match(pola, teks)
         if cocok:
@@ -40,12 +45,12 @@ def jalankan(aksi: str, params: dict | None = None) -> tuple[str, str]:
     """Mengembalikan (teks_untuk_layar, teks_untuk_diucapkan)."""
     fungsi = AKSI.get(aksi)
     if fungsi is None:
-        pesan = "Aksi itu tidak ada dalam daftar yang diizinkan."
+        pesan = "That action is not on the allowed list."
         return pesan, pesan
     try:
         hasil = fungsi(**(params or {}))
     except Exception:
         logging.exception("Aksi %s gagal", aksi)
-        pesan = "Terjadi kesalahan saat menjalankan aksi itu."
+        pesan = "Something went wrong while running that action."
         return pesan, pesan
     return hasil if isinstance(hasil, tuple) else (hasil, hasil)

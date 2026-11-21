@@ -6,10 +6,23 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DEFAULT = {
     "nama_pengguna": "",
-    "suara_edge": "id-ID-GadisNeural",
+    "suara_edge": "en-IE-EmilyNeural",
     "jeda_awal_detik": 5,
     "folder_pencarian": [],
     "workspace": {},
+    "stt_model": "small",
+    "stt_device": "cpu",
+    "stt_compute_type": "int8",
+    "stt_bahasa": "id",
+    "mikrofon": None,
+    "ambang_hening": 0.01,
+    "hening_detik": 1.2,
+    "tunggu_bicara_detik": 6,
+    "maks_rekam_detik": 15,
+    "suara_laju": "+0%",
+    "suara_nada": "+0Hz",
+    "suara_cadangan": "en-GB-SoniaNeural",
+    "suara_offline": "Zira",
 }
 
 

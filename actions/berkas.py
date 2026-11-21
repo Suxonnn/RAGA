@@ -26,13 +26,13 @@ def _telusuri(folders: list, kata: str, batas: int) -> list:
 
 
 def cari_file(kata: str = "", **_):
-    kata = kata.strip().lower()
     if not kata:
-        return "Sebutkan nama file yang dicari."
+        return "Please tell me which file to look for."
     folders = muat_config()["folder_pencarian"] or _folder_default()
     hasil = _telusuri(folders, kata, BATAS_HASIL)
     if not hasil:
-        return f"Tidak ada file yang cocok dengan '{kata}'."
-    tampil = f"Ketemu {len(hasil)} file:\n" + "\n".join(hasil)
-    ucap = f"Ketemu {len(hasil)} file. Daftarnya sudah saya tampilkan di layar."
+        return f"No files match '{kata}'."
+    jumlah = f"{len(hasil)} file" + ("" if len(hasil) == 1 else "s")
+    tampil = f"Found {jumlah}:\n" + "\n".join(hasil)
+    ucap = f"I found {jumlah}. The list is on your screen."
     return tampil, ucap

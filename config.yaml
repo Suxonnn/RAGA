@@ -1,8 +1,10 @@
 # Pengaturan RAGA. Gunakan tanda kutip tunggal '...' untuk jalur Windows.
-nama_pengguna: ""
-suara_edge: "id-ID-GadisNeural"   # pria: "id-ID-ArdiNeural"
-jeda_awal_detik: 5
-
+# Pengaturan RAGA. Gunakan tanda kutip tunggal '...' untuk jalur Windows.
+nama_pengguna: "Master"
+suara_edge: "en-IE-EmilyNeural"
+suara_cadangan: "en-GB-SoniaNeural"
+suara_offline: "Zira"
+jeda_awal_detik: 3
 # Folder yang ditelusuri perintah "cari file". Kosongkan untuk memakai
 # Documents, Downloads, dan Desktop milik akun Windows-mu.
 folder_pencarian:
@@ -15,3 +17,18 @@ workspace:
     - program: "code"
       argumen: ['E:\Project RAGA']
     - url: "https://github.com"
+
+# --- Speech-to-text (Tahap 3) ---
+stt_model: "small"         # tiny / base / small / medium: makin besar makin akurat tapi berat
+stt_device: "cpu"          # ganti "cuda" jika punya GPU NVIDIA
+stt_compute_type: "int8"   # untuk "cuda" pakai "float16"
+stt_bahasa: "id"
+mikrofon: 1             # microfon yang sedang saya pakai
+
+
+ambang_hening: 0.01        # di atas angka ini dianggap sedang bicara
+hening_detik: 1.2          # diam selama ini = selesai bicara
+tunggu_bicara_detik: 6     # batas menunggu kamu mulai bicara
+maks_rekam_detik: 15       # batas panjang satu perintah
+suara_laju: "-8%"     # negatif = lebih lambat dan tenang
+suara_nada: "-3Hz"    # negatif = lebih dalam

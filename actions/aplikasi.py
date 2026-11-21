@@ -10,8 +10,8 @@ def buka_workspace(nama: str = "", **_) -> str:
     workspace = muat_config()["workspace"]
     nama = nama.strip().lower()
     if nama not in workspace:
-        tersedia = ", ".join(workspace) or "belum ada"
-        return f"Workspace '{nama}' tidak ada. Yang tersedia: {tersedia}."
+        tersedia = ", ".join(workspace) or "none"
+        return f"Workspace '{nama}' not found. Available: {tersedia}."
 
     dibuka, gagal = 0, []
     for item in workspace[nama]:
@@ -27,7 +27,7 @@ def buka_workspace(nama: str = "", **_) -> str:
         except Exception:
             gagal.append(str(item.get("program") or item.get("url")))
 
-    teks = f"Workspace {nama} dibuka, {dibuka} item."
+    teks = f"Opening workspace {nama}, {dibuka} items launched."
     if gagal:
-        teks += f" Gagal membuka: {', '.join(gagal)}."
+        teks += f" Failed to open: {', '.join(gagal)}."
     return teks

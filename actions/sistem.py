@@ -3,25 +3,24 @@ import psutil
 
 GB = 1024 ** 3
 
-
 def cek_ram(**_) -> str:
     m = psutil.virtual_memory()
     return (
-        f"RAM terpakai {m.percent:.0f} persen, "
-        f"{m.used / GB:.1f} dari {m.total / GB:.1f} gigabyte."
+        f"Memory usage is at {m.percent:.0f} percent, "
+        f"{m.used / GB:.1f} of {m.total / GB:.1f} gigabytes."
     )
 
 
 def cek_cpu(**_) -> str:
-    return f"Beban CPU saat ini {psutil.cpu_percent(interval=1):.0f} persen."
+    return f"CPU load is at {psutil.cpu_percent(interval=1):.0f} percent."
 
 
 def cek_baterai(**_) -> str:
     b = psutil.sensors_battery()
     if b is None:
-        return "Tidak ada baterai yang terdeteksi."
-    status = "sedang diisi" if b.power_plugged else "belum dicolok"
-    return f"Baterai tersisa {int(b.percent)} persen, {status}."
+        return "No battery detected."
+    status = "charging" if b.power_plugged else "not plugged in"
+    return f"Battery is at {int(b.percent)} percent, {status}."
 
 
 def cek_disk(**_) -> str:
@@ -33,5 +32,5 @@ def cek_disk(**_) -> str:
             u = psutil.disk_usage(p.mountpoint)
         except OSError:
             continue
-        bagian.append(f"Disk {p.device.rstrip(chr(92))} sisa {u.free / GB:.0f} gigabyte")
-    return ". ".join(bagian) + "." if bagian else "Tidak ada disk yang terbaca."
+        bagian.append(f"Drive {p.device[0]} has {u.free / GB:.0f} gigabytes free")
+    return ". ".join(bagian) + "." if bagian else "No drives could be read."
