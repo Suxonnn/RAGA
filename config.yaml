@@ -1,9 +1,9 @@
 # Pengaturan RAGA. Gunakan tanda kutip tunggal '...' untuk jalur Windows.
 # Pengaturan RAGA. Gunakan tanda kutip tunggal '...' untuk jalur Windows.
 nama_pengguna: "Master"
-suara_edge: "en-IE-EmilyNeural"
-suara_cadangan: "en-GB-SoniaNeural"
-suara_offline: "Zira"
+piper_model: "models/en_GB-jenny_dioco-medium.onnx"
+piper_laju: 1.25          # ganti dengan angka kecepatan yang kamu pilih saat tes
+suara_offline: "Zira"     # hanya dipakai jika Piper gagal
 jeda_awal_detik: 3
 # Folder yang ditelusuri perintah "cari file". Kosongkan untuk memakai
 # Documents, Downloads, dan Desktop milik akun Windows-mu.
@@ -30,5 +30,5 @@ ambang_hening: 0.01        # di atas angka ini dianggap sedang bicara
 hening_detik: 1.2          # diam selama ini = selesai bicara
 tunggu_bicara_detik: 6     # batas menunggu kamu mulai bicara
 maks_rekam_detik: 15       # batas panjang satu perintah
-suara_laju: "-8%"     # negatif = lebih lambat dan tenang
-suara_nada: "-3Hz"    # negatif = lebih dalam
+suara_laju: "-8%"
+suara_nada: "+0Hz"   

@@ -4,3 +4,5 @@ __pycache__/
 raga.log
 .env
 *.mp3
+models/
+*.wav

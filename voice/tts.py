@@ -1,43 +1,45 @@
-"""Text-to-speech: edge-tts (online) dengan cadangan pyttsx3 (offline)."""
-import asyncio
+"""Text-to-speech: Piper (offline), suara en_GB-jenny_dioco-medium.
+Cadangan terakhir: suara bawaan Windows (pyttsx3) jika Piper tidak bisa dipakai."""
 import logging
 import os
 import re
 import tempfile
-import time
+import wave
 
-from core.config import muat_config
+from core.config import BASE_DIR, muat_config
 
-
-def putar_mp3(path: str) -> None:
-    import ctypes
-
-    mci = ctypes.windll.winmm.mciSendStringW
-    mci("close raga", None, 0, 0)
-    if mci(f'open "{path}" type mpegvideo alias raga', None, 0, 0) != 0:
-        raise RuntimeError("MCI gagal membuka file audio")
-    try:
-        mci("play raga wait", None, 0, 0)
-    finally:
-        mci("close raga", None, 0, 0)
+_piper = None   # lazy loading: model dimuat saat pertama dipakai
 
 
 def bersihkan(teks: str) -> str:
-    teks = re.sub(r"\.{2,}", ".", teks)
     return re.sub(r"\s+", " ", teks).strip()
 
 
-def bicara_edge(teks: str, suara: str) -> None:
-    import edge_tts
+def _muat_piper():
+    global _piper
+    if _piper is None:
+        from piper import PiperVoice
 
-    cfg = muat_config()
-    path = os.path.join(tempfile.gettempdir(), "raga_suara.mp3")
-    komunikasi = edge_tts.Communicate(
-        teks, suara, rate=cfg["suara_laju"], pitch=cfg["suara_nada"]
-    )
-    asyncio.run(komunikasi.save(path))
+        path = os.path.join(BASE_DIR, muat_config()["piper_model"])
+        _piper = PiperVoice.load(path)
+    return _piper
+
+
+def bicara_piper(teks: str) -> None:
+    import winsound
+
+    voice = _muat_piper()
+    laju = float(muat_config()["piper_laju"])
+    path = os.path.join(tempfile.gettempdir(), "raga_piper.wav")
+    with wave.open(path, "wb") as wav:
+        try:
+            from piper import SynthesisConfig
+        except ImportError:
+            voice.synthesize(teks, wav, length_scale=laju)      # Piper versi lama
+        else:
+            voice.synthesize_wav(teks, wav, syn_config=SynthesisConfig(length_scale=laju))
     try:
-        putar_mp3(path)
+        winsound.PlaySound(path, winsound.SND_FILENAME)
     finally:
         if os.path.exists(path):
             os.remove(path)
@@ -59,16 +61,8 @@ def bicara_offline(teks: str) -> None:
 
 def bicara(teks: str) -> None:
     teks = bersihkan(teks)
-    cfg = muat_config()
-    for suara in (cfg["suara_edge"], cfg["suara_cadangan"]):
-        for percobaan in (1, 2):
-            try:
-                bicara_edge(teks, suara)
-                return
-            except Exception as e:
-                logging.warning(
-                    "edge-tts gagal (%s) | suara=%s percobaan=%d | teks=%r",
-                    type(e).__name__, suara, percobaan, teks[:60],
-                )
-                time.sleep(percobaan)
-    bicara_offline(teks)
+    try:
+        bicara_piper(teks)
+    except Exception:
+        logging.exception("Piper gagal, memakai suara bawaan Windows")
+        bicara_offline(teks)

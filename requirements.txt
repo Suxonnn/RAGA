@@ -1,7 +1,7 @@
 psutil
-edge-tts
 pyttsx3
 pyyaml
 numpy
 sounddevice
 faster-whisper
+piper-tts

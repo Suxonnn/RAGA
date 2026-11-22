@@ -34,8 +34,25 @@ def sapaan_waktu() -> str:
         return "afternoon"
     return "evening"
 
+SATUAN = [
+    "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+    "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+    "sixteen", "seventeen", "eighteen", "nineteen",
+]
+PULUHAN = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+
+
+def angka_ke_kata(n: int) -> str:
+    if n < 20:
+        return SATUAN[n]
+    if n < 100:
+        puluh, sisa = divmod(n, 10)
+        return PULUHAN[puluh] + (f" {SATUAN[sisa]}" if sisa else "")
+    return "one hundred"
+
 
 def susun_teks() -> str:
+    
     nama = muat_config()["nama_pengguna"]
     salam = f"Good {sapaan_waktu()}" + (f", {nama}" if nama else "")
     bagian = [salam + ". All systems are online. Raga is ready to assist."]
@@ -43,9 +60,14 @@ def susun_teks() -> str:
     baterai = psutil.sensors_battery()
     if baterai:
         status = "charging" if baterai.power_plugged else "not plugged in"
-        bagian.append(f"Battery is at {int(baterai.percent)} percent, {status}.")
-    bagian.append(f"Memory usage is at {int(psutil.virtual_memory().percent)} percent.")
+        bagian.append(
+            f"Battery is at {angka_ke_kata(int(baterai.percent))} percent, {status}."
+        )
+    bagian.append(
+        f"Memory usage is at {angka_ke_kata(int(psutil.virtual_memory().percent))} percent."
+    )
     return " ".join(bagian)
+
 
 
 def salam() -> None:
