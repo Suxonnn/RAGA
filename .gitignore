@@ -6,3 +6,4 @@ raga.log
 *.mp3
 models/
 *.wav
+*.zip

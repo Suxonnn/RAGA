@@ -25,9 +25,8 @@ def _muat_piper():
     return _piper
 
 
-def bicara_piper(teks: str) -> None:
-    import winsound
-
+def buat_suara_piper(teks: str) -> str:
+    """Mengubah teks menjadi file WAV (belum diputar), mengembalikan jalurnya."""
     voice = _muat_piper()
     laju = float(muat_config()["piper_laju"])
     path = os.path.join(tempfile.gettempdir(), "raga_piper.wav")
@@ -38,11 +37,21 @@ def bicara_piper(teks: str) -> None:
             voice.synthesize(teks, wav, length_scale=laju)      # Piper versi lama
         else:
             voice.synthesize_wav(teks, wav, syn_config=SynthesisConfig(length_scale=laju))
+    return path
+
+
+def putar_wav(path: str) -> None:
+    import winsound
+
     try:
         winsound.PlaySound(path, winsound.SND_FILENAME)
     finally:
         if os.path.exists(path):
             os.remove(path)
+
+
+def bicara_piper(teks: str) -> None:
+    putar_wav(buat_suara_piper(teks))
 
 
 def bicara_offline(teks: str) -> None:

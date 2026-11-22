@@ -9,6 +9,7 @@ import datetime
 import logging
 import os
 import time
+import threading
 
 KATA_KELUAR = ("keluar", "exit", "quit")
 
@@ -24,6 +25,7 @@ import psutil  # noqa: E402
 from core.config import muat_config  # noqa: E402
 from core.router import jalankan, urai_perintah  # noqa: E402
 from voice.tts import bicara  # noqa: E402
+from voice.tts import bicara, bicara_offline, buat_suara_piper, putar_wav
 
 
 def sapaan_waktu() -> str:
@@ -70,11 +72,52 @@ def susun_teks() -> str:
 
 
 
+def desktop_siap(batas_detik: float = 60) -> bool:
+    """True begitu taskbar Windows (tanda desktop sudah tampil) terdeteksi."""
+    import ctypes
+
+    mulai = time.time()
+    while time.time() - mulai < batas_detik:
+        if ctypes.windll.user32.FindWindowW("Shell_TrayWnd", None):
+            return True
+        time.sleep(0.2)
+    return False
+
+
 def salam() -> None:
-    time.sleep(muat_config()["jeda_awal_detik"])
+    cfg = muat_config()
+    mulai = time.time()
     teks = susun_teks()
     logging.info("Salam: %s", teks)
-    bicara(teks)
+
+    hasil = {}
+
+    def siapkan():
+        try:
+            hasil["path"] = buat_suara_piper(teks)
+        except Exception:
+            logging.exception("Piper gagal menyiapkan suara")
+
+    pekerja = threading.Thread(target=siapkan)
+    pekerja.start()                  # bagian berat jalan di latar belakang
+
+    desktop = desktop_siap()         # sementara itu, tunggu desktop muncul
+    t_desktop = time.time()
+    pekerja.join()                   # pastikan suaranya sudah jadi
+    t_siap = time.time()
+
+    sisa = cfg["jeda_setelah_desktop_detik"] - (time.time() - t_desktop)
+    if sisa > 0:
+        time.sleep(sisa)
+
+    logging.info(
+        "Waktu: desktop=%s pada %.1f dtk | suara siap %.1f dtk | diputar %.1f dtk",
+        desktop, t_desktop - mulai, t_siap - mulai, time.time() - mulai,
+    )
+    if "path" in hasil:
+        putar_wav(hasil["path"])
+    else:
+        bicara_offline(teks)
 
 
 def mode_ketik(bersuara: bool) -> None:

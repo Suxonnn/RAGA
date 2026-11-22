@@ -4,7 +4,7 @@ nama_pengguna: "Master"
 piper_model: "models/en_GB-jenny_dioco-medium.onnx"
 piper_laju: 1.25          # ganti dengan angka kecepatan yang kamu pilih saat tes
 suara_offline: "Zira"     # hanya dipakai jika Piper gagal
-jeda_awal_detik: 3
+jeda_setelah_desktop_detik: 2
 # Folder yang ditelusuri perintah "cari file". Kosongkan untuk memakai
 # Documents, Downloads, dan Desktop milik akun Windows-mu.
 folder_pencarian:

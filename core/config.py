@@ -9,7 +9,7 @@ DEFAULT = {
     "piper_model": "models/en_GB-jenny_dioco-medium.onnx",
     "piper_laju": 1.25,
     "suara_offline": "Zira",
-    "jeda_awal_detik": 5,
+    "jeda_setelah_desktop_detik": 2,
     "folder_pencarian": [],
     "workspace": {},
     "stt_model": "small",
