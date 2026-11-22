@@ -7,7 +7,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT = {
     "nama_pengguna": "",
     "piper_model": "models/en_GB-jenny_dioco-medium.onnx",
-    "piper_laju": 1.25,
+    "piper_laju": 1.2,
     "suara_offline": "Zira",
     "jeda_setelah_desktop_detik": 2,
     "folder_pencarian": [],
@@ -21,6 +21,8 @@ DEFAULT = {
     "hening_detik": 1.2,
     "tunggu_bicara_detik": 6,
     "maks_rekam_detik": 15,
+    "jeda_titik_detik": 0.6,
+    "jeda_koma_detik": 0.25,
 }
 
 

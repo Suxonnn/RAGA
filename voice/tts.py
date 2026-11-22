@@ -5,6 +5,7 @@ import os
 import re
 import tempfile
 import wave
+import io
 
 from core.config import BASE_DIR, muat_config
 
@@ -26,17 +27,27 @@ def _muat_piper():
 
 
 def buat_suara_piper(teks: str) -> str:
-    """Mengubah teks menjadi file WAV (belum diputar), mengembalikan jalurnya."""
+    """Mengubah teks menjadi satu file WAV, dengan jeda di tanda baca."""
+    cfg = muat_config()
+    daftar = _pecah(teks)
+    if not daftar:
+        raise ValueError("teks kosong")
+
     voice = _muat_piper()
-    laju = float(muat_config()["piper_laju"])
+    laju = float(cfg["piper_laju"])
     path = os.path.join(tempfile.gettempdir(), "raga_piper.wav")
-    with wave.open(path, "wb") as wav:
-        try:
-            from piper import SynthesisConfig
-        except ImportError:
-            voice.synthesize(teks, wav, length_scale=laju)      # Piper versi lama
-        else:
-            voice.synthesize_wav(teks, wav, syn_config=SynthesisConfig(length_scale=laju))
+
+    with wave.open(path, "wb") as keluar:
+        diatur = False
+        for potongan, jeda in daftar:
+            with wave.open(_sintesis(voice, potongan, laju), "rb") as masuk:
+                if not diatur:
+                    keluar.setparams(masuk.getparams())
+                    diatur = True
+                keluar.writeframes(masuk.readframes(masuk.getnframes()))
+                lebar = masuk.getsampwidth() * masuk.getnchannels()
+                kecepatan = masuk.getframerate()
+            keluar.writeframes(b"\x00" * int(kecepatan * jeda) * lebar)
     return path
 
 
@@ -75,3 +86,35 @@ def bicara(teks: str) -> None:
     except Exception:
         logging.exception("Piper gagal, memakai suara bawaan Windows")
         bicara_offline(teks)
+
+def _pecah(teks: str) -> list:
+    """Memecah teks per kalimat/klausa, tiap potong disertai lama jeda sesudahnya."""
+    cfg = muat_config()
+    hasil = []
+    for p in re.findall(r"[^.,!?;:]+[.,!?;:]?", teks):
+        p = p.strip()
+        isi = p.rstrip(".,!?;:").strip()
+        if not isi:
+            continue
+        if p[-1] in ".!?":
+            jeda = cfg["jeda_titik_detik"]
+        elif p[-1] in ",;:":
+            jeda = cfg["jeda_koma_detik"]
+        else:
+            jeda = 0.0
+        hasil.append((p, jeda))
+    return hasil
+
+
+def _sintesis(voice, teks: str, laju: float) -> io.BytesIO:
+    """Menyintesis satu potongan teks ke WAV di memori (tanpa menyentuh disk)."""
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as wav:
+        try:
+            from piper import SynthesisConfig
+        except ImportError:
+            voice.synthesize(teks, wav, length_scale=laju)      # Piper versi lama
+        else:
+            voice.synthesize_wav(teks, wav, syn_config=SynthesisConfig(length_scale=laju))
+    buf.seek(0)
+    return buf
