@@ -22,7 +22,7 @@ workspace:
 stt_model: "small"         # tiny / base / small / medium: makin besar makin akurat tapi berat
 stt_device: "cpu"          # ganti "cuda" jika punya GPU NVIDIA
 stt_compute_type: "int8"   # untuk "cuda" pakai "float16"
-stt_bahasa: "id"
+stt_bahasa: "en"
 mikrofon: 1             # microfon yang sedang saya pakai
 
 
@@ -35,3 +35,6 @@ suara_nada: "+0Hz"
 piper_laju: 1.2
 jeda_titik_detik: 0.35
 jeda_koma_detik: 0.15
+
+kata_pemanggil: "mycroft"    # potongan nama model: mycroft, alexa, jarvis, rhasspy
+ambang_pemanggil: 0.5        # naikkan jika sering salah picu, turunkan jika sulit terpanggil

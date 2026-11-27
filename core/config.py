@@ -15,7 +15,7 @@ DEFAULT = {
     "stt_model": "small",
     "stt_device": "cpu",
     "stt_compute_type": "int8",
-    "stt_bahasa": "id",
+    "stt_bahasa": "en",
     "mikrofon": None,
     "ambang_hening": 0.01,
     "hening_detik": 1.2,
@@ -23,6 +23,8 @@ DEFAULT = {
     "maks_rekam_detik": 15,
     "jeda_titik_detik": 0.6,
     "jeda_koma_detik": 0.25,
+    "kata_pemanggil": "mycroft",
+    "ambang_pemanggil": 0.5,
 }
 
 

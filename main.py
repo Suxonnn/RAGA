@@ -170,10 +170,44 @@ def mode_suara() -> None:
         print(f"Kamu: {teks}")
         proses_perintah(teks, bersuara=True)
 
+def mode_siaga() -> None:
+    from voice.stt import dengar, siapkan_model as siapkan_stt
+    from voice.wakeword import siapkan_model as siapkan_wake, tunggu_kata_pemanggil
+
+    cfg = muat_config()
+    nama = cfg["nama_pengguna"]
+    sapaan = f"Yes, {nama}?" if nama else "Yes?"
+
+    print("Memuat model (pertama kali agak lama)...")
+    siapkan_wake()
+    siapkan_stt()
+    print(f"Siaga. Ucapkan '{cfg['kata_pemanggil']}' untuk memanggil RAGA. Ctrl+C untuk berhenti.")
+    try:
+        while True:
+            tunggu_kata_pemanggil()
+            logging.info("Kata pemanggil terdeteksi")
+            print("Terdeteksi.")
+            bicara(sapaan)
+            print("Mendengarkan...")
+            try:
+                teks = dengar()
+            except Exception as e:
+                logging.exception("Gagal mendengar")
+                print(f"Mikrofon bermasalah: {e}")
+                continue
+            if not teks:
+                print("(tidak ada suara terdengar)")
+                continue
+            print(f"Kamu: {teks}")
+            proses_perintah(teks, bersuara=True)
+    except KeyboardInterrupt:
+        print("\nRAGA berhenti.")
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--ketik", action="store_true")
     parser.add_argument("--suara", action="store_true")
+    parser.add_argument("--siaga", action="store_true")
     parser.add_argument("--senyap", action="store_true")
     parser.add_argument("--tes-mic", action="store_true")
     args = parser.parse_args()
@@ -181,6 +215,8 @@ def main() -> None:
     if args.tes_mic:
         from voice.stt import tes_mic
         tes_mic()
+    elif args.siaga:
+        mode_siaga()
     elif args.suara:
         mode_suara()
     elif args.ketik:

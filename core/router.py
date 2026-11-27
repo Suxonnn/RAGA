@@ -33,7 +33,7 @@ def normalisasi(teks: str) -> str:
 
 
 def urai_perintah(teks: str):
-    teks = normalisasi(teks)          # <- baris ini menggantikan teks.strip().lower()
+    teks = normalisasi(teks)          
     for pola, aksi in POLA:
         cocok = re.match(pola, teks)
         if cocok:
